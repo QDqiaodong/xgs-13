@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "customer", indexes = {
         @Index(name = "idx_name", columnList = "name")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_name", columnNames = "name")
 })
 public class Customer {
 

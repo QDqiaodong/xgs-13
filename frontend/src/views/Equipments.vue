@@ -256,14 +256,22 @@ const handleSubmit = async () => {
 }
 
 const handleDelete = async (row) => {
-  await ElMessageBox.confirm(`确定删除设备「${row.equipmentModel}」吗？`, '删除确认', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  })
-  await deleteEquipment(row.id)
-  ElMessage.success('删除成功')
-  loadData()
+  try {
+    await ElMessageBox.confirm(`确定删除设备「${row.equipmentModel}」吗？`, '删除确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+  } catch {
+    return
+  }
+  try {
+    await deleteEquipment(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+  } catch (e) {
+    // 错误已由request拦截器提示
+  }
 }
 
 onMounted(() => {

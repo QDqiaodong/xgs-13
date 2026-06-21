@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS customer (
     remark VARCHAR(500) COMMENT '备注',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_name (name),
     INDEX idx_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='客户表';
 
@@ -40,11 +41,12 @@ CREATE TABLE IF NOT EXISTS equipment (
     remark VARCHAR(500) COMMENT '备注',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_serial_number (serial_number),
     INDEX idx_customer_id (customer_id),
     INDEX idx_category_id (category_id),
     INDEX idx_next_maintenance_date (next_maintenance_date),
     INDEX idx_status (status),
-    FOREIGN KEY (customer_id) REFERENCES customer(id) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customer(id) ON DELETE RESTRICT,
     FOREIGN KEY (category_id) REFERENCES equipment_category(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='设备档案表';
 
@@ -75,6 +77,7 @@ CREATE TABLE IF NOT EXISTS spare_part (
     remark VARCHAR(500) COMMENT '备注',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_part_model (part_model),
     INDEX idx_category_id (category_id),
     INDEX idx_part_model (part_model),
     INDEX idx_stock_quantity (stock_quantity),
@@ -120,8 +123,8 @@ CREATE TABLE IF NOT EXISTS maintenance_order (
     INDEX idx_plan_date (plan_date),
     INDEX idx_actual_date (actual_date),
     INDEX idx_created_at (created_at),
-    FOREIGN KEY (equipment_id) REFERENCES equipment(id),
-    FOREIGN KEY (customer_id) REFERENCES customer(id) ON DELETE CASCADE
+    FOREIGN KEY (equipment_id) REFERENCES equipment(id) ON DELETE RESTRICT,
+    FOREIGN KEY (customer_id) REFERENCES customer(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='维保工单表';
 
 -- 工单备件消耗表
@@ -136,10 +139,11 @@ CREATE TABLE IF NOT EXISTS order_part_consumption (
     quantity INT NOT NULL COMMENT '消耗数量',
     unit_price DECIMAL(12, 2) DEFAULT 0.00 COMMENT '单价(快照)',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_order_part (order_id, part_id),
     INDEX idx_order_id (order_id),
     INDEX idx_part_id (part_id),
     FOREIGN KEY (order_id) REFERENCES maintenance_order(id) ON DELETE CASCADE,
-    FOREIGN KEY (part_id) REFERENCES spare_part(id)
+    FOREIGN KEY (part_id) REFERENCES spare_part(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工单备件消耗表';
 
 -- 维保计划表
@@ -154,9 +158,10 @@ CREATE TABLE IF NOT EXISTS maintenance_plan (
     remark VARCHAR(500) COMMENT '备注',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_equipment_date_type (equipment_id, plan_date, plan_type),
     INDEX idx_equipment_id (equipment_id),
     INDEX idx_plan_date (plan_date),
     INDEX idx_plan_status (plan_status),
-    FOREIGN KEY (equipment_id) REFERENCES equipment(id) ON DELETE CASCADE,
+    FOREIGN KEY (equipment_id) REFERENCES equipment(id) ON DELETE RESTRICT,
     FOREIGN KEY (order_id) REFERENCES maintenance_order(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='维保计划表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='维保计划表';

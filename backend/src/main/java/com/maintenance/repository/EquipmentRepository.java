@@ -20,6 +20,10 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
 
     List<Equipment> findByNextMaintenanceDateBefore(LocalDate date);
 
+    long countByCustomerId(Long customerId);
+
+    long countByCategoryId(Long categoryId);
+
     @Query("SELECT e FROM Equipment e WHERE " +
            "(:keyword IS NULL OR :keyword = '' OR " +
            "e.equipmentModel LIKE %:keyword% OR " +

@@ -60,7 +60,7 @@ INSERT INTO customer (name, contact_person, contact_phone, address, remark) VALU
 ('瑞丰食品加工厂', '王主任', '13800138003', '杭州市余杭区良渚街道工业园', '冷库设备重点维护'),
 ('鑫达纺织印染有限公司', '赵总', '13800138004', '无锡市惠山区堰桥街道工业园区', '空压机群集中管理'),
 ('明辉制药股份有限公司', '陈工', '13800138005', '南京市江宁区科学园芝兰路', 'GMP要求严格')
-ON DUPLICATE KEY UPDATE contact_person = VALUES(contact_person), contact_phone = VALUES(contact_phone);
+ON DUPLICATE KEY UPDATE contact_person = VALUES(contact_person), contact_phone = VALUES(contact_phone), address = VALUES(address), remark = VALUES(remark);
 
 -- 初始化示例备件数据
 INSERT INTO spare_part (category_id, part_model, part_name, spec, unit, stock_quantity, safety_stock, unit_price, supplier) VALUES
@@ -74,7 +74,7 @@ INSERT INTO spare_part (category_id, part_model, part_name, spec, unit, stock_qu
 (5, '46#抗磨液压油', 'L-HM46抗磨液压油', '18L/桶', '桶', 10, 5, 580.00, '长城润滑油'),
 (6, 'R134a', '环保制冷剂', '13.6kg/罐', 'kg', 200, 100, 45.00, '大金'),
 (7, 'CJX2-3210', '交流接触器', '32A 220V', '个', 25, 10, 85.00, '正泰电器')
-ON DUPLICATE KEY UPDATE part_name = VALUES(part_name), stock_quantity = VALUES(stock_quantity);
+ON DUPLICATE KEY UPDATE part_name = VALUES(part_name), spec = VALUES(spec), unit = VALUES(unit), stock_quantity = VALUES(stock_quantity), safety_stock = VALUES(safety_stock), unit_price = VALUES(unit_price), supplier = VALUES(supplier);
 
 -- 初始化示例设备数据
 INSERT INTO equipment (customer_id, category_id, equipment_model, serial_number, install_address, install_date, last_maintenance_date, next_maintenance_date, status) VALUES
@@ -85,7 +85,7 @@ INSERT INTO equipment (customer_id, category_id, equipment_model, serial_number,
 (3, 3, 'YSD-30W冷水机组', 'YORK-YSD30-2021-003', '杭州市余杭区良渚街道工业园冷库', '2021-11-05', '2024-01-08', '2024-07-08', 'NORMAL'),
 (4, 2, 'ZR315VSD离心空压机', 'ATLAS-ZR315-2020-007', '无锡市惠山区堰桥街道工业园区动力中心', '2020-09-12', '2024-04-18', '2024-07-18', 'NORMAL'),
 (5, 3, 'CWA-100螺杆冷水机', 'CARRIER-CWA100-2022-012', '南京市江宁区科学园芝兰路制药车间', '2022-05-25', '2024-02-20', '2024-08-20', 'NORMAL')
-ON DUPLICATE KEY UPDATE serial_number = VALUES(serial_number), last_maintenance_date = VALUES(last_maintenance_date);
+ON DUPLICATE KEY UPDATE customer_id = VALUES(customer_id), category_id = VALUES(category_id), equipment_model = VALUES(equipment_model), install_address = VALUES(install_address), install_date = VALUES(install_date), last_maintenance_date = VALUES(last_maintenance_date), next_maintenance_date = VALUES(next_maintenance_date), status = VALUES(status);
 
 -- 初始化示例维保工单
 INSERT INTO maintenance_order (order_no, equipment_id, customer_id, order_type, order_status, plan_date, actual_date, engineer, work_hours, work_content) VALUES
@@ -94,7 +94,7 @@ INSERT INTO maintenance_order (order_no, equipment_id, customer_id, order_type, 
 ('WO20240610003', 6, 4, 'PERIODIC', 'IN_PROGRESS', '2024-06-10', NULL, '张工程师', NULL, '离心空压机季度维保进行中'),
 ('WO20240615004', 4, 2, 'PERIODIC', 'PENDING', '2024-06-15', NULL, NULL, NULL, '待执行：空压机季度维保'),
 ('WO20240615005', 2, 1, 'FAULT', 'PENDING', '2024-06-15', NULL, NULL, NULL, '故障报修：空压机高温报警')
-ON DUPLICATE KEY UPDATE order_status = VALUES(order_status);
+ON DUPLICATE KEY UPDATE equipment_id = VALUES(equipment_id), customer_id = VALUES(customer_id), order_type = VALUES(order_type), order_status = VALUES(order_status), plan_date = VALUES(plan_date), actual_date = VALUES(actual_date), engineer = VALUES(engineer), work_hours = VALUES(work_hours), work_content = VALUES(work_content);
 
 -- 初始化示例备件消耗
 INSERT INTO order_part_consumption (order_id, part_id, part_name, part_model, spec, unit, quantity, unit_price) VALUES
@@ -102,7 +102,7 @@ INSERT INTO order_part_consumption (order_id, part_id, part_name, part_model, sp
 (1, 3, '骨架油封', 'TC-40*62*8', '内径40mm外径62mm厚8mm', '个', 4, 12.00),
 (2, 3, '空压机空气滤芯', 'C1176', '适用75kW螺杆机', '个', 1, 185.00),
 (2, 4, '空压机机油滤芯', 'C23632', '适用37-90kW机型', '个', 1, 95.00)
-ON DUPLICATE KEY UPDATE quantity = VALUES(quantity);
+ON DUPLICATE KEY UPDATE part_name = VALUES(part_name), part_model = VALUES(part_model), spec = VALUES(spec), unit = VALUES(unit), quantity = VALUES(quantity), unit_price = VALUES(unit_price);
 
 -- 初始化示例维保计划
 INSERT INTO maintenance_plan (equipment_id, plan_date, plan_type, cycle_months, plan_status) VALUES
@@ -112,4 +112,4 @@ INSERT INTO maintenance_plan (equipment_id, plan_date, plan_type, cycle_months, 
 (4, '2024-09-15', 'PERIODIC', 3, 'PENDING'),
 (5, '2025-01-08', 'PERIODIC', 6, 'PENDING'),
 (7, '2025-02-20', 'PERIODIC', 6, 'PENDING')
-ON DUPLICATE KEY UPDATE plan_date = VALUES(plan_date);
+ON DUPLICATE KEY UPDATE plan_date = VALUES(plan_date), cycle_months = VALUES(cycle_months), plan_status = VALUES(plan_status);

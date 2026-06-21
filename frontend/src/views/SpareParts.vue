@@ -262,10 +262,18 @@ async function handleSubmitForm() {
 }
 
 async function handleDelete(row) {
-  await ElMessageBox.confirm(`确定删除备件「${row.partName}」吗？`, '提示', { type: 'warning' })
-  await deleteSparePart(row.id)
-  ElMessage.success('删除成功')
-  loadData()
+  try {
+    await ElMessageBox.confirm(`确定删除备件「${row.partName}」吗？`, '提示', { type: 'warning' })
+  } catch {
+    return
+  }
+  try {
+    await deleteSparePart(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+  } catch (e) {
+    // 错误已由request拦截器提示
+  }
 }
 
 const stockVisible = ref(false)

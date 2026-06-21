@@ -14,4 +14,6 @@ public interface OrderPartConsumptionRepository extends JpaRepository<OrderPartC
     List<OrderPartConsumption> findByOrderId(Long orderId);
 
     Page<OrderPartConsumption> findByPartId(Long partId, Pageable pageable);
+
+    long countByPartId(Long partId);
 }

@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
         @Index(name = "idx_category_id", columnList = "category_id"),
         @Index(name = "idx_next_maintenance_date", columnList = "next_maintenance_date"),
         @Index(name = "idx_status", columnList = "status")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_serial_number", columnNames = "serial_number")
 })
 public class Equipment {
 

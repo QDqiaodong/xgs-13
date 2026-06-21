@@ -166,16 +166,23 @@ const handleSubmit = async () => {
   loadData()
 }
 
-const handleDelete = (row) => {
-  ElMessageBox.confirm(`确定删除客户「${row.name}」吗？`, '提示', {
-    type: 'warning',
-    confirmButtonText: '确定',
-    cancelButtonText: '取消'
-  }).then(async () => {
+const handleDelete = async (row) => {
+  try {
+    await ElMessageBox.confirm(`确定删除客户「${row.name}」吗？`, '提示', {
+      type: 'warning',
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
+    })
+  } catch {
+    return
+  }
+  try {
     await deleteCustomer(row.id)
     ElMessage.success('删除成功')
     loadData()
-  }).catch(() => {})
+  } catch (e) {
+    // 错误已由request拦截器提示
+  }
 }
 
 onMounted(() => {

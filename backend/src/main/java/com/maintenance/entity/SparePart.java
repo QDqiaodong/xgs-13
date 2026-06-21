@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
         @Index(name = "idx_category_id", columnList = "category_id"),
         @Index(name = "idx_part_model", columnList = "part_model"),
         @Index(name = "idx_stock_quantity", columnList = "stock_quantity")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_part_model", columnNames = "part_model")
 })
 public class SparePart {
 

@@ -22,6 +22,10 @@ public interface MaintenanceOrderRepository extends JpaRepository<MaintenanceOrd
 
     List<MaintenanceOrder> findByActualDateBetween(LocalDate startDate, LocalDate endDate);
 
+    long countByCustomerId(Long customerId);
+
+    long countByEquipmentId(Long equipmentId);
+
     @Query("SELECT m FROM MaintenanceOrder m WHERE " +
            "(:keyword IS NULL OR :keyword = '' OR " +
            "m.orderNo LIKE %:keyword% OR " +

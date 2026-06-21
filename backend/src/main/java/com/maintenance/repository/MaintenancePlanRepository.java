@@ -18,6 +18,8 @@ public interface MaintenancePlanRepository extends JpaRepository<MaintenancePlan
 
     List<MaintenancePlan> findByPlanDateBetweenAndPlanStatus(LocalDate startDate, LocalDate endDate, String status);
 
+    long countByEquipmentId(Long equipmentId);
+
     @Query("SELECT m FROM MaintenancePlan m WHERE " +
            "(:equipmentId IS NULL OR m.equipmentId = :equipmentId) AND " +
            "(:planStatus IS NULL OR :planStatus = '' OR m.planStatus = :planStatus) AND " +

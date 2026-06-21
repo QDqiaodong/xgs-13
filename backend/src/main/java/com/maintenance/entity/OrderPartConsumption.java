@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @Table(name = "order_part_consumption", indexes = {
         @Index(name = "idx_order_id", columnList = "order_id"),
         @Index(name = "idx_part_id", columnList = "part_id")
+}, uniqueConstraints = {
+        @UniqueConstraint(name = "uk_order_part", columnNames = {"order_id", "part_id"})
 })
 public class OrderPartConsumption {
 

@@ -1,8 +1,10 @@
 package com.maintenance.service;
 
+import com.maintenance.common.BusinessException;
 import com.maintenance.common.PageResult;
 import com.maintenance.entity.SparePart;
 import com.maintenance.entity.SparePartCategory;
+import com.maintenance.repository.OrderPartConsumptionRepository;
 import com.maintenance.repository.SparePartCategoryRepository;
 import com.maintenance.repository.SparePartRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class SparePartService {
 
     private final SparePartRepository sparePartRepository;
     private final SparePartCategoryRepository sparePartCategoryRepository;
+    private final OrderPartConsumptionRepository orderPartConsumptionRepository;
 
     public List<SparePartCategory> findAllCategories() {
         return sparePartCategoryRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
@@ -77,6 +80,10 @@ public class SparePartService {
 
     @Transactional
     public void delete(Long id) {
+        long consumptionCount = orderPartConsumptionRepository.countByPartId(id);
+        if (consumptionCount > 0) {
+            throw new BusinessException("该备件存在 " + consumptionCount + " 条工单消耗记录，无法删除。");
+        }
         sparePartRepository.deleteById(id);
     }
 }

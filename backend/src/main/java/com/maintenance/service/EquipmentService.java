@@ -1,10 +1,13 @@
 package com.maintenance.service;
 
+import com.maintenance.common.BusinessException;
 import com.maintenance.common.PageResult;
 import com.maintenance.entity.Equipment;
 import com.maintenance.entity.EquipmentCategory;
 import com.maintenance.repository.EquipmentCategoryRepository;
 import com.maintenance.repository.EquipmentRepository;
+import com.maintenance.repository.MaintenanceOrderRepository;
+import com.maintenance.repository.MaintenancePlanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +25,8 @@ public class EquipmentService {
     private final EquipmentRepository equipmentRepository;
     private final EquipmentCategoryRepository equipmentCategoryRepository;
     private final CacheService cacheService;
+    private final MaintenanceOrderRepository maintenanceOrderRepository;
+    private final MaintenancePlanRepository maintenancePlanRepository;
 
     public List<EquipmentCategory> findAllCategories() {
         return equipmentCategoryRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
@@ -119,6 +124,14 @@ public class EquipmentService {
 
     @Transactional
     public void delete(Long id) {
+        long orderCount = maintenanceOrderRepository.countByEquipmentId(id);
+        if (orderCount > 0) {
+            throw new BusinessException("该设备下存在 " + orderCount + " 条维保工单，无法删除。请先删除关联工单。");
+        }
+        long planCount = maintenancePlanRepository.countByEquipmentId(id);
+        if (planCount > 0) {
+            throw new BusinessException("该设备下存在 " + planCount + " 条维保计划，无法删除。请先删除关联计划。");
+        }
         equipmentRepository.deleteById(id);
     }
 }
