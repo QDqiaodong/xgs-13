@@ -15,6 +15,9 @@
           <el-menu-item index="/orders">
             <span>维保工单</span>
           </el-menu-item>
+          <el-menu-item index="/schedule">
+            <span>工单排班</span>
+          </el-menu-item>
           <el-menu-item index="/plans">
             <span>维保计划</span>
           </el-menu-item>

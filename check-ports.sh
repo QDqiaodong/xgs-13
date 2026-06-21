@@ -16,13 +16,22 @@ check_port() {
     fi
 }
 
+find_port() {
+    local port=$1
+    while lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; do
+        echo "端口 $port 已被占用，尝试下一个端口..." >&2
+        port=$((port + 1))
+    done
+    echo "$port"
+}
+
 echo "=== 端口冲突检测 ==="
 echo ""
 
-check_port "$FRONTEND_PORT" "前端"
-check_port "$BACKEND_PORT" "后端"
-check_port "$MYSQL_PORT" "MySQL"
-check_port "$REDIS_PORT" "Redis"
+FRONTEND_PORT=$(find_port "$FRONTEND_PORT")
+BACKEND_PORT=$(find_port "$BACKEND_PORT")
+MYSQL_PORT=$(find_port "$MYSQL_PORT")
+REDIS_PORT=$(find_port "$REDIS_PORT")
 
 if [ ${#ERRORS[@]} -gt 0 ]; then
     echo "❌ 端口冲突检测失败！"
@@ -41,3 +50,16 @@ echo "  后端: $BACKEND_PORT"
 echo "  MySQL: $MYSQL_PORT"
 echo "  Redis: $REDIS_PORT"
 echo ""
+
+cat > .env.runtime <<EOF
+COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}
+DOCKER_REGISTRY=${DOCKER_REGISTRY}
+FRONTEND_PORT=${FRONTEND_PORT}
+BACKEND_PORT=${BACKEND_PORT}
+MYSQL_PORT=${MYSQL_PORT}
+REDIS_PORT=${REDIS_PORT}
+MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+MYSQL_DATABASE=${MYSQL_DATABASE}
+MYSQL_USER=${MYSQL_USER}
+MYSQL_PASSWORD=${MYSQL_PASSWORD}
+EOF

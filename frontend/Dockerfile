@@ -2,7 +2,7 @@ ARG DOCKER_REGISTRY=docker.1ms.run
 FROM ${DOCKER_REGISTRY}/library/node:18-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN --mount=type=cache,target=/root/.npm npm config set registry https://registry.npmmirror.com && npm install
+RUN npm config set registry https://registry.npmmirror.com && npm install
 
 FROM ${DOCKER_REGISTRY}/library/node:18-alpine AS build
 WORKDIR /app

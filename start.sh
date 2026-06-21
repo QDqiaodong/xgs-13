@@ -17,9 +17,10 @@ echo "1/3 端口冲突检测..."
 if [ $? -ne 0 ]; then
     exit 1
 fi
+source .env.runtime
 
 echo "2/3 构建 Docker 镜像并启动容器..."
-docker compose up --build -d
+docker compose --env-file .env.runtime up --build -d
 if [ $? -ne 0 ]; then
     echo ""
     echo "❌ Docker 构建启动失败"
