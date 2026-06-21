@@ -382,7 +382,7 @@ async function loadOrders() {
     params.endDate = searchForm.dateRange[1]
   }
   const res = await getOrders(params)
-  tableData.value = res.data.list || []
+  tableData.value = res.data.records || []
   pagination.total = res.data.total || 0
 }
 

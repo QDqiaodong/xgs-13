@@ -102,7 +102,7 @@ const statusLabel = (status) => {
 const loadStats = async () => {
   const [equipRes, orderRes, lowStockRes, expiringRes] = await Promise.all([
     getEquipments({ pageNum: 1, pageSize: 1 }),
-    getOrders({ pageNum: 1, pageSize: 1, status: 'PENDING' }),
+    getOrders({ pageNum: 1, pageSize: 1, orderStatus: 'PENDING' }),
     getLowStockParts(),
     getExpiringEquipments()
   ])
