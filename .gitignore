@@ -86,7 +86,12 @@ data/mysql/
 data/redis/
 data/minio/
 
-# ====================== 10、本地打包发布产物 ======================
+# ====================== 10、本地启动与容器构建脚本（按项目要求不纳入版本跟踪） ======================
+backend/Dockerfile
+frontend/Dockerfile
+check-ports.sh
+start.sh
+
+# ====================== 11、本地打包发布产物 ======================
 **/release/*.tar.gz
 frontend/package-lock.json
-
