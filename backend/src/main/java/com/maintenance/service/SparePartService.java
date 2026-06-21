@@ -56,7 +56,6 @@ public class SparePartService {
         existing.setPartName(sparePart.getPartName());
         existing.setSpec(sparePart.getSpec());
         existing.setUnit(sparePart.getUnit());
-        existing.setStockQuantity(sparePart.getStockQuantity());
         existing.setSafetyStock(sparePart.getSafetyStock());
         existing.setUnitPrice(sparePart.getUnitPrice());
         existing.setSupplier(sparePart.getSupplier());
@@ -66,15 +65,14 @@ public class SparePartService {
 
     @Transactional
     public SparePart updateStock(Long id, Integer quantity, boolean isAdd) {
-        SparePart sparePart = findById(id);
-        int newStock = isAdd
-                ? sparePart.getStockQuantity() + quantity
-                : sparePart.getStockQuantity() - quantity;
-        if (newStock < 0) {
-            throw new IllegalArgumentException("库存不足，当前库存: " + sparePart.getStockQuantity());
+        int delta = isAdd ? quantity : -quantity;
+        int updated = sparePartRepository.adjustStockAtomically(id, delta);
+        if (updated == 0) {
+            SparePart current = findById(id);
+            throw new IllegalArgumentException("库存不足，当前库存: " + current.getStockQuantity());
         }
-        sparePart.setStockQuantity(newStock);
-        return sparePartRepository.save(sparePart);
+        return sparePartRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("备件不存在，ID: " + id));
     }
 
     @Transactional

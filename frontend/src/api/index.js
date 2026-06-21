@@ -32,6 +32,9 @@ export function getSpareParts(params) { return request.get('/spare-parts', { par
 export function getSparePart(id) { return request.get(`/spare-parts/${id}`) }
 export function createSparePart(data) { return request.post('/spare-parts', data) }
 export function updateSparePart(id, data) { return request.put(`/spare-parts/${id}`, data) }
+export function adjustSparePartStock(id, quantity, isAdd) {
+  return request.put(`/spare-parts/${id}/stock`, null, { params: { quantity, isAdd } })
+}
 export function deleteSparePart(id) { return request.delete(`/spare-parts/${id}`) }
 export function getSparePartCategories() { return request.get('/spare-parts/categories') }
 export function getLowStockParts() { return request.get('/spare-parts/low-stock') }

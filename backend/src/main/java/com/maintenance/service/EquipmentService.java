@@ -75,10 +75,25 @@ public class EquipmentService {
         existing.setSerialNumber(equipment.getSerialNumber());
         existing.setInstallAddress(equipment.getInstallAddress());
         existing.setInstallDate(equipment.getInstallDate());
-        existing.setLastMaintenanceDate(equipment.getLastMaintenanceDate());
-        existing.setNextMaintenanceDate(equipment.getNextMaintenanceDate());
         existing.setStatus(equipment.getStatus());
         existing.setRemark(equipment.getRemark());
+
+        if (equipment.getLastMaintenanceDate() != null
+                && !equipment.getLastMaintenanceDate().equals(existing.getLastMaintenanceDate())) {
+            existing.setLastMaintenanceDate(equipment.getLastMaintenanceDate());
+            equipmentCategoryRepository.findById(existing.getCategoryId()).ifPresent(category -> {
+                Integer intervalDays = cacheService.getMaintenanceInterval(category.getCode());
+                if (intervalDays == null) {
+                    intervalDays = category.getMaintenanceIntervalDays();
+                }
+                existing.setNextMaintenanceDate(equipment.getLastMaintenanceDate().plusDays(intervalDays));
+            });
+        }
+
+        if (equipment.getNextMaintenanceDate() != null) {
+            existing.setNextMaintenanceDate(equipment.getNextMaintenanceDate());
+        }
+
         return equipmentRepository.save(existing);
     }
 

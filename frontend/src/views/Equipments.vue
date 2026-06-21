@@ -145,6 +145,7 @@ const dialogForm = reactive({
   installAddress: '',
   installDate: '',
   lastMaintenanceDate: '',
+  nextMaintenanceDate: '',
   status: 'NORMAL',
   remark: ''
 })
@@ -214,6 +215,7 @@ const openDialog = (row) => {
       installAddress: row.installAddress,
       installDate: row.installDate,
       lastMaintenanceDate: row.lastMaintenanceDate,
+      nextMaintenanceDate: row.nextMaintenanceDate,
       status: row.status,
       remark: row.remark
     })
@@ -227,6 +229,7 @@ const openDialog = (row) => {
       installAddress: '',
       installDate: '',
       lastMaintenanceDate: '',
+      nextMaintenanceDate: '',
       status: 'NORMAL',
       remark: ''
     })

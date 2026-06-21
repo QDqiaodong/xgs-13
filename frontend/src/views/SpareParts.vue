@@ -157,7 +157,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Warning } from '@element-plus/icons-vue'
 import {
   getSpareParts, createSparePart, updateSparePart, deleteSparePart,
-  getSparePartCategories, getLowStockParts
+  getSparePartCategories, getLowStockParts, adjustSparePartStock
 } from '../api'
 
 const categories = ref([])
@@ -289,18 +289,21 @@ async function handleSubmitStock() {
     ElMessage.warning('请输入有效的调整数量')
     return
   }
-  const part = tableData.value.find(p => p.id === stockForm.partId)
-  let newStock = stockForm.direction === 'in'
-    ? stockForm.currentStock + stockForm.quantity
-    : stockForm.currentStock - stockForm.quantity
-  if (newStock < 0) {
-    ElMessage.warning('出库数量不能超过当前库存')
-    return
+  const isAdd = stockForm.direction === 'in'
+  try {
+    const res = await adjustSparePartStock(stockForm.partId, stockForm.quantity, isAdd)
+    const updated = res.data
+    const idx = tableData.value.findIndex(p => p.id === stockForm.partId)
+    if (idx !== -1 && updated) {
+      tableData.value.splice(idx, 1, updated)
+    }
+    ElMessage.success(isAdd ? '入库成功' : '出库成功')
+    stockVisible.value = false
+  } catch (e) {
+    if (e.response && e.response.data && e.response.data.message) {
+      ElMessage.warning(e.response.data.message)
+    }
   }
-  await updateSparePart(stockForm.partId, { ...part, stockQuantity: newStock })
-  ElMessage.success(stockForm.direction === 'in' ? '入库成功' : '出库成功')
-  stockVisible.value = false
-  loadData()
 }
 
 const lowStockVisible = ref(false)
