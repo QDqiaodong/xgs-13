@@ -15,6 +15,7 @@ export function updateOrder(id, data) { return request.put(`/maintenance-orders/
 export function deleteOrder(id) { return request.delete(`/maintenance-orders/${id}`) }
 export function updateOrderStatus(id, status) { return request.put(`/maintenance-orders/${id}/status`, null, { params: { status } }) }
 export function completeOrder(id, data) { return request.put(`/maintenance-orders/${id}/complete`, data) }
+export function checkBatchOrderStatus(data) { return request.post('/maintenance-orders/batch-status-check', data) }
 export function batchUpdateOrderStatus(data) { return request.put('/maintenance-orders/batch-status', data) }
 export function getOrdersByDateRange(startDate, endDate) { return request.get('/maintenance-orders/calendar', { params: { startDate, endDate } }) }
 export function getOrderParts(orderId) { return request.get(`/maintenance-orders/${orderId}/parts`) }

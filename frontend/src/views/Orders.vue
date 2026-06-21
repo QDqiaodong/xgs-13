@@ -209,42 +209,97 @@
     </el-dialog>
 
     <el-dialog v-model="formVisible" :title="isEdit ? '编辑工单' : '新增工单'" width="600px" destroy-on-close>
+      <el-alert
+        v-if="isEdit && isOrderCompleted"
+        title="工单已完成，仅可修改备注字段"
+        type="warning"
+        :closable="false"
+        style="margin-bottom: 16px"
+      />
       <el-form :model="formData" :rules="formRules" ref="formRef" label-width="90px">
         <el-form-item label="客户" prop="customerId">
-          <el-select v-model="formData.customerId" placeholder="请选择客户" @change="handleCustomerChange" style="width: 100%">
+          <el-select
+            v-model="formData.customerId"
+            placeholder="请选择客户"
+            @change="handleCustomerChange"
+            style="width: 100%"
+            :disabled="isEdit && isOrderCompleted"
+          >
             <el-option v-for="c in customers" :key="c.id" :label="c.name" :value="c.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="设备" prop="equipmentId">
-          <el-select v-model="formData.equipmentId" placeholder="请选择设备" style="width: 100%">
+          <el-select
+            v-model="formData.equipmentId"
+            placeholder="请选择设备"
+            style="width: 100%"
+            :disabled="isEdit && isOrderCompleted"
+          >
             <el-option v-for="e in filteredEquipments" :key="e.id" :label="e.equipmentModel" :value="e.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="工单类型" prop="orderType">
-          <el-select v-model="formData.orderType" placeholder="请选择" style="width: 100%">
+          <el-select
+            v-model="formData.orderType"
+            placeholder="请选择"
+            style="width: 100%"
+            :disabled="isEdit && isOrderCompleted"
+          >
             <el-option label="定期维保" value="PERIODIC" />
             <el-option label="故障维修" value="FAULT" />
             <el-option label="清洗保养" value="CLEANING" />
           </el-select>
         </el-form-item>
         <el-form-item label="计划日期" prop="planDate">
-          <el-date-picker v-model="formData.planDate" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" style="width: 100%" />
+          <el-date-picker
+            v-model="formData.planDate"
+            type="date"
+            value-format="YYYY-MM-DD"
+            placeholder="选择日期"
+            style="width: 100%"
+            :disabled="isEdit && isOrderCompleted"
+          />
         </el-form-item>
         <el-form-item label="工程师" prop="engineer">
-          <el-input v-model="formData.engineer" placeholder="请输入工程师" />
+          <el-input
+            v-model="formData.engineer"
+            placeholder="请输入工程师"
+            :disabled="isEdit && isOrderCompleted"
+          />
         </el-form-item>
         <el-form-item label="工时" prop="workHours">
-          <el-input-number v-model="formData.workHours" :min="0" :precision="1" style="width: 100%" />
+          <el-input-number
+            v-model="formData.workHours"
+            :min="0"
+            :precision="1"
+            style="width: 100%"
+            :disabled="isEdit && isOrderCompleted"
+          />
         </el-form-item>
         <el-form-item label="故障描述" prop="faultDescription">
-          <el-input v-model="formData.faultDescription" type="textarea" :rows="3" />
+          <el-input
+            v-model="formData.faultDescription"
+            type="textarea"
+            :rows="3"
+            :disabled="isEdit && isOrderCompleted"
+          />
         </el-form-item>
         <template v-if="isEdit">
           <el-form-item label="工作内容" prop="workContent">
-            <el-input v-model="formData.workContent" type="textarea" :rows="3" />
+            <el-input
+              v-model="formData.workContent"
+              type="textarea"
+              :rows="3"
+              :disabled="isOrderCompleted"
+            />
           </el-form-item>
           <el-form-item label="解决方案" prop="solution">
-            <el-input v-model="formData.solution" type="textarea" :rows="3" />
+            <el-input
+              v-model="formData.solution"
+              type="textarea"
+              :rows="3"
+              :disabled="isOrderCompleted"
+            />
           </el-form-item>
         </template>
         <el-form-item label="备注" prop="remark">
@@ -304,11 +359,10 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="batchStatusVisible" title="批量修改状态" width="400px" destroy-on-close>
-      <p style="margin-bottom: 12px">已选择 <strong>{{ selectedRows.length }}</strong> 条工单</p>
+    <el-dialog v-model="batchStatusVisible" title="批量修改状态" width="700px" destroy-on-close>
       <el-form label-width="80px">
-        <el-form-item label="新状态">
-          <el-select v-model="batchStatusValue" placeholder="请选择" style="width: 100%">
+        <el-form-item label="目标状态">
+          <el-select v-model="batchStatusValue" placeholder="请选择" style="width: 200px" @change="handleBatchStatusChange">
             <el-option label="待处理" value="PENDING" />
             <el-option label="进行中" value="IN_PROGRESS" />
             <el-option label="已完成" value="COMPLETED" />
@@ -316,9 +370,62 @@
           </el-select>
         </el-form-item>
       </el-form>
+
+      <div v-if="batchStatusCheckResult" style="margin-top: 8px">
+        <div style="margin-bottom: 8px; display: flex; gap: 16px">
+          <span>共 <strong>{{ batchStatusCheckResult.totalCount }}</strong> 条</span>
+          <span style="color: #67c23a">可流转 <strong>{{ batchStatusCheckResult.validCount }}</strong> 条</span>
+          <span style="color: #f56c6c">不可流转 <strong>{{ batchStatusCheckResult.invalidCount }}</strong> 条</span>
+        </div>
+
+        <el-tabs v-model="batchStatusTab" type="border-card" style="margin-top: 12px">
+          <el-tab-pane label="可流转工单" name="valid">
+            <el-table :data="batchStatusCheckResult.validItems" border size="small" max-height="250">
+              <el-table-column prop="orderNo" label="工单号" width="150" />
+              <el-table-column prop="customerName" label="客户" min-width="100" />
+              <el-table-column prop="equipmentModel" label="设备型号" min-width="100" />
+              <el-table-column prop="currentStatusLabel" label="当前状态" width="90" align="center">
+                <template #default="{ row }">
+                  <el-tag :type="statusTagType(row.currentStatus)" size="small">{{ row.currentStatusLabel }}</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="targetStatusLabel" label="目标状态" width="90" align="center">
+                <template #default="{ row }">
+                  <el-tag :type="statusTagType(row.targetStatus)" size="small">{{ row.targetStatusLabel }}</el-tag>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
+          <el-tab-pane label="不可流转工单" name="invalid">
+            <el-table :data="batchStatusCheckResult.invalidItems" border size="small" max-height="250">
+              <el-table-column prop="orderNo" label="工单号" width="150" />
+              <el-table-column prop="customerName" label="客户" min-width="100" />
+              <el-table-column prop="equipmentModel" label="设备型号" min-width="100" />
+              <el-table-column prop="currentStatusLabel" label="当前状态" width="90" align="center">
+                <template #default="{ row }">
+                  <el-tag :type="statusTagType(row.currentStatus)" size="small">{{ row.currentStatusLabel }}</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="targetStatusLabel" label="目标状态" width="90" align="center">
+                <template #default="{ row }">
+                  <el-tag :type="statusTagType(row.targetStatus)" size="small">{{ row.targetStatusLabel }}</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="reason" label="原因" min-width="120" />
+            </el-table>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+
       <template #footer>
         <el-button @click="batchStatusVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmitBatchStatus">确定</el-button>
+        <el-button
+          type="primary"
+          :disabled="!batchStatusCheckResult || batchStatusCheckResult.validCount === 0"
+          @click="handleSubmitBatchStatus"
+        >
+          确定修改 ({{ batchStatusCheckResult?.validCount || 0 }})
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -330,7 +437,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import {
   getOrders, getOrder, createOrder, updateOrder, deleteOrder,
-  updateOrderStatus, completeOrder, batchUpdateOrderStatus,
+  updateOrderStatus, completeOrder, checkBatchOrderStatus, batchUpdateOrderStatus,
   getOrdersByDateRange, getOrderParts, addOrderPart, removeOrderPart,
   getAllCustomers, getEquipmentCategories, getSpareParts
 } from '../api'
@@ -403,6 +510,7 @@ function handleSelectionChange(rows) {
 
 const formVisible = ref(false)
 const isEdit = ref(false)
+const isOrderCompleted = ref(false)
 const formRef = ref(null)
 const formData = reactive({
   id: null,
@@ -436,6 +544,7 @@ function handleCustomerChange() {
 
 function handleAdd() {
   isEdit.value = false
+  isOrderCompleted.value = false
   Object.assign(formData, {
     id: null, customerId: null, equipmentId: null, orderType: 'PERIODIC',
     planDate: '', engineer: '', workHours: null, faultDescription: '',
@@ -446,6 +555,7 @@ function handleAdd() {
 
 async function handleEdit(row) {
   isEdit.value = true
+  isOrderCompleted.value = row.orderStatus === 'COMPLETED'
   const res = await getOrder(row.id)
   const o = res.data
   Object.assign(formData, {
@@ -580,22 +690,42 @@ async function handleSubmitStatusChange() {
 
 const batchStatusVisible = ref(false)
 const batchStatusValue = ref('')
+const batchStatusTab = ref('valid')
+const batchStatusCheckResult = ref(null)
 
 function handleBatchStatus() {
   batchStatusValue.value = ''
+  batchStatusCheckResult.value = null
   batchStatusVisible.value = true
 }
 
-async function handleSubmitBatchStatus() {
-  if (!batchStatusValue.value) {
-    ElMessage.warning('请选择新状态')
+async function handleBatchStatusChange() {
+  if (!batchStatusValue.value || selectedRows.value.length === 0) {
+    batchStatusCheckResult.value = null
     return
   }
+  try {
+    const res = await checkBatchOrderStatus({
+      ids: selectedRows.value.map(r => r.id),
+      targetStatus: batchStatusValue.value
+    })
+    batchStatusCheckResult.value = res.data
+  } catch (e) {
+    ElMessage.error('状态检查失败')
+  }
+}
+
+async function handleSubmitBatchStatus() {
+  if (!batchStatusCheckResult.value || batchStatusCheckResult.value.validCount === 0) {
+    ElMessage.warning('没有可流转的工单')
+    return
+  }
+  const validIds = batchStatusCheckResult.value.validItems.map(item => item.orderId)
   await batchUpdateOrderStatus({
-    ids: selectedRows.value.map(r => r.id),
+    ids: validIds,
     status: batchStatusValue.value
   })
-  ElMessage.success('批量修改成功')
+  ElMessage.success(`成功修改 ${validIds.length} 条工单状态`)
   batchStatusVisible.value = false
   loadOrders()
 }

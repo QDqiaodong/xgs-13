@@ -27,6 +27,10 @@ public class EquipmentService {
         return equipmentCategoryRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
+    public List<Equipment> findAll() {
+        return equipmentRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+    }
+
     public EquipmentCategory findCategoryByCode(String code) {
         return equipmentCategoryRepository.findByCode(code)
                 .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("设备分类不存在，Code: " + code));

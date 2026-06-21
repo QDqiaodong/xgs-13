@@ -2,6 +2,7 @@ package com.maintenance.controller;
 
 import com.maintenance.common.PageResult;
 import com.maintenance.common.Result;
+import com.maintenance.dto.BatchStatusCheckResult;
 import com.maintenance.entity.MaintenanceOrder;
 import com.maintenance.entity.OrderPartConsumption;
 import com.maintenance.service.MaintenanceOrderService;
@@ -70,6 +71,14 @@ public class MaintenanceOrderController {
     @PutMapping("/{id}/complete")
     public Result<MaintenanceOrder> completeOrder(@PathVariable Long id, @RequestBody MaintenanceOrder completionData) {
         return Result.success(maintenanceOrderService.completeOrder(id, completionData));
+    }
+
+    @PostMapping("/batch-status-check")
+    public Result<BatchStatusCheckResult> checkBatchStatus(@RequestBody Map<String, Object> params) {
+        @SuppressWarnings("unchecked")
+        List<Long> ids = (List<Long>) params.get("ids");
+        String targetStatus = (String) params.get("targetStatus");
+        return Result.success(maintenanceOrderService.checkBatchStatusTransition(ids, targetStatus));
     }
 
     @PutMapping("/batch-status")
